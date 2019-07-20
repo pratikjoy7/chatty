@@ -1,0 +1,2 @@
+recursive-include chatty/templates *
+recursive-include chatty/static *
