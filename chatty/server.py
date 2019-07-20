@@ -27,11 +27,21 @@ def login():
     return render_template('login.html')
 
 
-@app.route( '/' )
+@app.route('/')
 @requires_auth
 def index():
-  return render_template( 'index.html' )
+  return render_template('index.html')
+
+
+def messageRecived():
+  print 'message was received!!!'
+
+
+@socketio.on('my event')
+def handle_my_custom_event(json):
+  print 'recived my event: ' + str(json)
+  socketio.emit('my response', json, callback=messageRecived)
 
 
 if __name__ == '__main__':
-  socketio.run( app, debug = True )
+  socketio.run(app, debug = True)
