@@ -1,18 +1,12 @@
-import os
+from flask import render_template, session, redirect, url_for
+from sqlalchemy import exc
 
-from flask import Flask, render_template, session, redirect, url_for
-from flask_socketio import SocketIO, emit
-
-from chatty.config import Config
+from chatty import app, socketio
+from chatty.db import db
+from chatty.db.models import User
 from chatty.services import authentication
 from chatty.services.authorization import requires_auth
 
-
-os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
-
-app = Flask(__name__)
-app.config.from_object(Config)
-socketio = SocketIO( app )
 
 @app.route('/auth', defaults={'action': 'login'})
 @app.route('/auth/<action>')
@@ -30,18 +24,24 @@ def login():
 @app.route('/')
 @requires_auth
 def index():
-  return render_template('index.html')
+    user = User(session['user']['given_name'], session['user']['family_name'], session['user']['email'])
+    db.session.add(user)
+    try:
+        db.session.commit()
+    except exc.IntegrityError:
+        db.session.rollback()
+    return render_template('index.html')
 
 
 def messageRecived():
-  print 'message was received!!!'
+    print 'message was received!!!'
 
 
 @socketio.on('my event')
 def handle_my_custom_event(json):
-  print 'recived my event: ' + str(json)
-  socketio.emit('my response', json, callback=messageRecived)
+    print 'recived my event: ' + str(json)
+    socketio.emit('my response', json, callback=messageRecived)
 
 
 if __name__ == '__main__':
-  socketio.run(app, debug = True)
+    socketio.run(app, debug=True)
