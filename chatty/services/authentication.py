@@ -33,8 +33,6 @@ def authenticate(action):
 
     user = google.get('https://www.googleapis.com/oauth2/v1/userinfo').json()
 
-    if not user['email'].endswith('@newscred.com'):
-        return redirect(url_for('.login'))
     session['user'] = user
 
     return redirect(url_for('.index', _external=True))
