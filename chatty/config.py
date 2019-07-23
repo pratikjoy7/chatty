@@ -26,9 +26,8 @@ class Config(object):
     GOOGLE_CLIENT_SECRET = 'sGmSa6Q2Vt6TgiYNghAnfl7_'
     OAUTH1_PROVIDER_ENFORCE_SSL = False
 
-    # SQLALCHEMY_DATABASE_URI = 'mysql://chatty:qwe90qwe@127.0.0.1/chatty'
-    # SQLALCHEMY_POOL_RECYCLE = 3600
-    # SQLALCHEMY_TRACK_MODIFICATIONS = False
+    SQLALCHEMY_DATABASE_URI = 'mysql://chatty_user:qwe90qwe@127.0.0.1/chatty'
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     locals().update(
         load_config_from_json('/opt/chatty/conf/chatty.json', silent=True) or {})
