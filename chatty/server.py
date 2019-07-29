@@ -1,10 +1,10 @@
-from flask import render_template, session, redirect, url_for
+from flask import render_template, session, redirect, url_for, Response, request
 from sqlalchemy import exc
 
 from chatty import app, socketio
 from chatty.db import db
 from chatty.db.models import User
-from chatty.services import authentication
+from chatty.services import authentication, key_pair_generation, user
 from chatty.services.authorization import requires_auth
 
 
@@ -21,26 +21,39 @@ def login():
     return render_template('login.html')
 
 
+@app.route('/welcome')
+def welcome():
+    user.create_user(session['user'])
+    return render_template('welcome.html')
+
+
+@app.route('/private-key')
+@requires_auth
+def private_key():
+    private_key = key_pair_generation.generate_key_pair()
+    return Response(private_key,
+                    mimetype="text/plain",
+                    headers={"Content-Disposition":
+                            "attachment;filename=private_key.pem"})
+
+
 @app.route('/')
 @requires_auth
 def index():
-    user = User(session['user']['given_name'], session['user']['family_name'], session['user']['email'])
-    db.session.add(user)
-    try:
-        db.session.commit()
-    except exc.IntegrityError:
-        db.session.rollback()
-    return render_template('index.html')
+    users = user.get_users_to_chat_with(session['user']['email'])
+    return render_template('index.html', users=users)
 
 
 def messageRecived():
     print 'message was received!!!'
 
 
-@socketio.on('my event')
-def handle_my_custom_event(json):
-    print 'recived my event: ' + str(json)
-    socketio.emit('my response', json, callback=messageRecived)
+@socketio.on('user_session', namespace='/private')
+def set_user_session(email):
+    print {
+        'email': email,
+        'session_id': request.sid
+    } 
 
 
 if __name__ == '__main__':
