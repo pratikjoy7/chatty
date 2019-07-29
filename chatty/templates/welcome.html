@@ -13,12 +13,17 @@
             <div class="row justify-content-center">
                 <div class="col-12 col-sm-6 col-md-4">
                     <div class="login-container">
-                        <center><img src="{{ url_for('static', filename='images/logo.png')}}" style="max-width: 250px" class="profile-image"/></center>
+                        <center><h2>Welcome to Chatty!</h2></center>
+                        <img src="{{ url_for('static', filename='images/logo.png')}}" style="max-width: 250px" class="profile-image"/>
                         <hr>
-                        <a href="{{ url_for('.auth', action='login') }}" role="button" class="btn btn-lg btn-outline-primary btn-block">
-                            <i class="fa fa-google" style="font-size:24px"></i>
-                            Login with Google
+                        <a href="{{ url_for('.private_key') }}" role="button" class="btn btn-lg btn-outline-primary btn-block">
+                            Download Private Key
+                            &nbsp;<i class="fa fa-download" style="font-size:24px"></i>
                         </a>
+                        <a href="{{ url_for('.index') }}" role="button" class="btn btn-lg btn-outline-primary btn-block">
+                                Proceed!
+                                &nbsp;<i class="fa fa-angle-double-right" style="font-size:24px"></i>
+                            </a>
                     </div>
                 </div>
             </div>
