@@ -2,6 +2,8 @@ from flask import url_for, redirect, flash, session, request
 from requests_oauthlib import OAuth2Session
 
 from chatty.config import Config
+from chatty.db import db
+from chatty.db.models import User
 
 
 def authenticate(action):
@@ -35,4 +37,8 @@ def authenticate(action):
 
     session['user'] = user
 
+    exists = db.session.query(User.id).filter_by(email=user['email']).scalar()
+
+    if not exists:        
+        return redirect(url_for('.welcome', _external=True))
     return redirect(url_for('.index', _external=True))
