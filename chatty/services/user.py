@@ -21,3 +21,7 @@ def update_public_key(email, public_key):
 
 def get_users_to_chat_with(email):
     return User.query.filter(User.email != email).all()
+
+
+def get_user_by_email(email):
+    return User.query.filter_by(email=email).first()

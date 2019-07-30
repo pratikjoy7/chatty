@@ -1,10 +1,7 @@
 from flask import render_template, session, redirect, url_for, Response, request
-from sqlalchemy import exc
 
 from chatty import app, socketio
-from chatty.db import db
-from chatty.db.models import User
-from chatty.services import authentication, key_pair_generation, user
+from chatty.services import authentication, key_pair_generation, user, user_session
 from chatty.services.authorization import requires_auth
 
 
@@ -34,7 +31,7 @@ def private_key():
     return Response(private_key,
                     mimetype="text/plain",
                     headers={"Content-Disposition":
-                            "attachment;filename=private_key.pem"})
+                             "attachment;filename=private_key.pem"})
 
 
 @app.route('/')
@@ -50,10 +47,13 @@ def messageRecived():
 
 @socketio.on('user_session', namespace='/private')
 def set_user_session(email):
-    print {
-        'email': email,
-        'session_id': request.sid
-    } 
+    user_session.create_session(email, request.sid)
+
+
+@socketio.on('message_sent', namespace='/private')
+def process_message(payload):
+    recipient_email = payload['recipient']
+    socketio.emit('new_private_message', payload, room=user_session.get_session_id_of_user(recipient_email))
 
 
 if __name__ == '__main__':
