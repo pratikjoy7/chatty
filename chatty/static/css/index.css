@@ -240,6 +240,10 @@ body, html {
 	background-color: rgba(0,0,0,0.2);
 }
 
+.unclickable {
+	pointer-events: none
+}
+
 @media(max-width: 576px) {
 	.contacts_card {
 		margin-bottom: 15px !important;
