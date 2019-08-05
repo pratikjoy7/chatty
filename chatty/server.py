@@ -1,4 +1,5 @@
 from flask import render_template, session, redirect, url_for, Response, request
+from flask_socketio import SocketIO, emit
 
 from chatty import app, socketio
 from chatty.services import authentication, key_pair_generation, user, user_session
@@ -28,10 +29,11 @@ def welcome():
 @requires_auth
 def private_key():
     private_key = key_pair_generation.generate_key_pair()
+    filename = '%s_chatty_private_key.pem' % session['user']['given_name']
     return Response(private_key,
                     mimetype="text/plain",
                     headers={"Content-Disposition":
-                             "attachment;filename=private_key.pem"})
+                             "attachment;filename=%s" % filename})
 
 
 @app.route('/')
@@ -52,8 +54,17 @@ def set_user_session(email):
 
 @socketio.on('message_sent', namespace='/private')
 def process_message(payload):
-    recipient_email = payload['recipient']
-    socketio.emit('new_private_message', payload, room=user_session.get_session_id_of_user(recipient_email))
+    if payload.get('encrypt', ''):
+        payload['message'] = user.encrypt_message(payload['recipient'], payload['message'])
+    session_id = user_session.get_session_id_of_user(payload['recipient'])
+    emit('new_private_message', payload, room=str(session_id))
+
+
+@socketio.on('decrypt_message', namespace='/private')
+def decrypt_message(payload):
+    payload['message'] = user.decrypt_message(payload['message'], payload['private_key'])
+    session_id = user_session.get_session_id_of_user(payload['email'])
+    emit('new_decrypted_msg', payload, room=str(session_id))
 
 
 if __name__ == '__main__':

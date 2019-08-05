@@ -12,7 +12,7 @@ def create_session(email, session_id):
     db.session.commit()
 
 
-def get_session_ids_of_user(email):
+def get_session_id_of_user(email):
     session_user = user.get_user_by_email(email)
     session = UserSession.query.filter_by(user=session_user).first()
 
